@@ -7,20 +7,29 @@ const app = document.querySelector('#app')
 // 创建Map对象
 const map = new om.Map({
     container: app,
-    verifyUrl: 'https://www.ooomap.com/ooomap-verify/check/1325e1157359c31080cd53204ff74915',
-    appID: '9de19d198413ac206f8118de730f2ede'
+    verifyUrl: 'https://www.ooomap.com/ooomap-verify/check/a83b7010ee631c04c43250dc7b907a6a',
+    appID: 'f885c56988582790b06f82c43810972c',
+    autoIndoorThreshold: 0.5
 })
 
 /////////////////// 用于坐标映射 ////////////////// 
 // 拾取的ooomap地图上的平面坐标
+// let map_coord = {
+//     center: [-187.24, -248.10, 0],
+//     x_pos: [76.19, -248.54, 0]
+// }
 let map_coord = {
-    center: [-143.719, 96.853, 0],
-    x_pos: [130.103, 96.494, 0]
+    center: [52.314, -204.882, 0],
+    x_pos: [-156.357, -206.81, 0]
 }
 
 // 需要将经纬度转为墨卡托坐标
-let m1 = om.utils.coordTransform.lngLatToMercator(117.214555, 39.095636)
-let m2 = om.utils.coordTransform.lngLatToMercator(117.215305, 39.09527)
+// let m1 = om.utils.coordTransform.lngLatToMercator(120.16902413994117, 36.0033176776926)
+// let m2 = om.utils.coordTransform.lngLatToMercator(120.17187609545955, 36.00374745435119)
+// let m1 = om.utils.coordTransform.lngLatToMercator(117.20523011646581, 39.09223374182203)
+// let m2 = om.utils.coordTransform.lngLatToMercator(117.20625656738201, 39.09225105035402)
+let m1 = om.utils.coordTransform.lngLatToMercator(117.2053831, 39.0923111)
+let m2 = om.utils.coordTransform.lngLatToMercator(117.206352, 39.092321)
 
 // 经纬度对应的墨卡托坐标点
 let real_coord = {
@@ -30,6 +39,7 @@ let real_coord = {
 
 // 构建坐标映射
 const cp = new om.CoordProjection(real_coord, map_coord)
+console.log('cp', cp)
 
 // 将经纬度转为墨卡托坐标
 function transCoord(lng, lat) {
@@ -79,6 +89,8 @@ map.on('buildingLoaded', b => {
 
     // 创建一个定位点
     pointer = om.createNaviPointer(map, 'images/pointer.png')
+
+    console.log('pointer', pointer)
     
     // 设置一下它的初始坐标
     pointer.position = transCoord(117.214621, 39.095565)
@@ -118,6 +130,66 @@ map.on('picked', res => {
     }
 })
 
+/**
+ * @typedef {{longitude: number, latitude: number}} GPS_Coord
+ */
+
+/**
+ * @type {{
+ * android: GPS_Coord[],
+ * iOS: GPS_Coord[],
+ * }}
+ */
+let gps = null;
+
+/** @type {GPS_Coord[]} */
+let currentGPSArray = null
+let gpsIndex = 0;
+/** @type {GPS_Coord} */
+let currentLnglat = null
+
+fetch('./gps2.json')
+    .then(res => res.json())
+    .then(res => {
+        // 获得gps数据
+        gps = res
+        currentGPSArray = gps.android
+    })
+
+// 模拟gps获取位置经纬度坐标
+// setInterval(() => {
+
+//     if (!currentGPSArray || !pointer) {
+//         return
+//     }
+
+//     let index = gpsIndex % currentGPSArray.length
+//     currentLnglat = currentGPSArray[index]
+
+//     let v = transCoord(currentLnglat.longitude, currentLnglat.latitude)
+
+//     console.log('数据索引:', index, '数据地图坐标:', v.x, v.y)
+
+//     pointer.moveTo({
+//         position: v
+//     })
+
+//     gpsIndex ++
+// }, 500);
+
+navigator.geolocation.watchPosition(res => {
+    if (!pointer) {
+        return
+    }
+
+    let v = transCoord(res.coords.longitude, res.coords.latitude)
+
+    v.z = 6
+
+    pointer.moveTo({
+        position: v
+    })
+})
 
 /**
  * 路线规划方法
