@@ -11,7 +11,11 @@
 
   </head>
   <body>
-    <div id="app"></div>
+    <div style="display: flex;flex-direction: column;height: 100%;">
+        <div id="leaflet" style="flex-basis: 100%"></div>
+        <div id="app"></div>
+    </div>
+    <div class="coordinates" id="coords">点击地图拾取坐标...</div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

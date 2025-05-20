@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leaflet 坐标拾取 - 经纬度 (经度在前)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Make sure you put this AFTER Leaflet's CSS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+    .coordinates {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 16px;
+      z-index: 1000;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="coordinates" id="coords">点击地图拾取坐标...</div>
+
+<script>
+  // 初始化地图
+  const map = L.map('map').setView([39.9042, 116.4074], 8); // 初始视图为北京
+
+  // 添加 OpenStreetMap 图层
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/ ">OpenStreetMap</a> 贡献者',
+    maxZoom: 19,
+  }).addTo(map);
+
+  let currentMarker = null;
+
+  // 监听点击事件
+  map.on('click', function(e) {
+    const lat = e.latlng.lat.toFixed(6);   // 纬度
+    const lng = e.latlng.lng.toFixed(6);   // 经度
+
+    const coordText = `WGS84坐标, 经度: ${lng}, ${lat} (坐标已经复制到剪切板)`; // 注意：经度在前，纬度在后
+    document.getElementById('coords').textContent = coordText;
+
+    // console.log(`WGS84 坐标: ${coordText}`);
+
+    // 移除已有标记
+    if (currentMarker) {
+      map.removeLayer(currentMarker);
+    }
+
+    // 添加新标记
+    currentMarker = L.marker([lat, lng]).addTo(map);
+    // currentMarker.bindPopup(`<strong>WGS84坐标:</strong><br>${coordText}`).openPopup();
+
+    // 自动复制到剪贴板
+    navigator.clipboard.writeText(`${ lng }, ${ lat }`).then(() => {
+      //console.log('坐标已复制到剪贴板');
+    }).catch(err => {
+      console.error('复制失败:', err);
+    });
+  });
+</script>
+
+</body>
+</html>

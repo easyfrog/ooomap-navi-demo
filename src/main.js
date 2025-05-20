@@ -1,5 +1,6 @@
 import './style.css'
 import './ui';
+import './leafWorks';
 import { glo } from './glo';
 
 const app = document.querySelector('#app')
@@ -28,8 +29,8 @@ let map_coord = {
 // let m2 = om.utils.coordTransform.lngLatToMercator(120.17187609545955, 36.00374745435119)
 // let m1 = om.utils.coordTransform.lngLatToMercator(117.20523011646581, 39.09223374182203)
 // let m2 = om.utils.coordTransform.lngLatToMercator(117.20625656738201, 39.09225105035402)
-let m1 = om.utils.coordTransform.lngLatToMercator(117.2053831, 39.0923111)
-let m2 = om.utils.coordTransform.lngLatToMercator(117.206352, 39.092321)
+let m1 = om.utils.coordTransform.lngLatToMercator(117.205217, 39.092329)
+let m2 = om.utils.coordTransform.lngLatToMercator(117.206441, 39.092347)
 
 // 经纬度对应的墨卡托坐标点
 let real_coord = {
@@ -177,18 +178,35 @@ fetch('./gps2.json')
 //     gpsIndex ++
 // }, 500);
 
-navigator.geolocation.watchPosition(res => {
+/**
+ * 
+ * @param {GeolocationPosition} res 
+ * @returns 
+ */
+function moveToCoord(res) {
     if (!pointer) {
         return
     }
 
+    console.log('v', res)
     let v = transCoord(res.coords.longitude, res.coords.latitude)
+    console.log('v', v)
 
     v.z = 6
 
     pointer.moveTo({
         position: v
     })
+}
+
+navigator.geolocation.watchPosition(res => {
+    
+    moveToCoord(res)
+    
+})
+
+glo.on('gps', ( /** @type {GeolocationPosition} */res) => {
+    moveToCoord(res)
 })
 
 /**

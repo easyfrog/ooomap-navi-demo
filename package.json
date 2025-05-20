@@ -12,6 +12,7 @@
     "vite": "^6.2.0"
   },
   "dependencies": {
+    "leaflet": "^1.9.4",
     "ooomap": "^1.10.1-0"
   }
 }
